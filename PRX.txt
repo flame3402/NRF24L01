@@ -1,0 +1,44 @@
+#include <SPI.h>
+#include <nRF24L01p.h>
+#include <Wire.h> 
+
+
+nRF24L01p receiver(7,8);//CSN,CE
+
+
+void setup(){
+  delay(150);
+  SPI.begin();
+  SPI.setBitOrder(MSBFIRST);
+  receiver.channel(90);
+  receiver.RXaddress("Artur");
+  receiver.init();
+
+  Serial.begin(9600);
+  
+  Serial.println("St Hum Temp/(F) ");
+
+}
+
+String Start;
+float humidity;
+float temperature;
+float TF;
+
+void loop(){ 
+  
+    receiver.read();
+    receiver.rxPL(humidity);
+    receiver.rxPL(temperature);
+    receiver.rxPL(TF);
+ 
+    Serial.print(humidity,0);
+    Serial.print("% ");
+    Serial.print(temperature,1);
+    Serial.print("/");
+    Serial.println(TF,1);
+
+    delay(2000);
+
+
+}

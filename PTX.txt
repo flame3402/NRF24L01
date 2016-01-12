@@ -1,0 +1,43 @@
+#include <SPI.h>
+#include <nRF24L01p.h>
+#include "DHT.h"
+
+#define DHTPIN 2
+#define DHTTYPE DHT11 
+
+DHT dht(DHTPIN, DHTTYPE);
+
+nRF24L01p transmitter(7,8);//CSN,CE
+
+void setup(){
+  delay(150);
+  SPI.begin();
+  SPI.setBitOrder(MSBFIRST);
+  transmitter.channel(90);
+  transmitter.TXaddress("Artur");
+  transmitter.init();
+  Serial.begin(9600);
+  dht.begin();
+}
+
+void loop(){
+      delay(2000);
+      float h = dht.readHumidity();
+      float t = dht.readTemperature();
+      float f = dht.readTemperature(true);
+      
+      float hic = dht.computeHeatIndex(t, h, false);
+      float hif = dht.computeHeatIndex(f, h);
+     
+      transmitter.txPL(h);
+      transmitter.txPL(hic);
+      transmitter.txPL(hif);
+      transmitter.send(FAST); 
+
+      Serial.print(h);
+      Serial.println("%  ");
+      Serial.print(hic);
+      Serial.print("'c  ");
+      Serial.print(hif);
+      Serial.println("'f");
+}
